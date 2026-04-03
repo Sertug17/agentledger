@@ -5,448 +5,208 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AgentLedger — OWS</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --bg: #f5f0eb;
-      --bg2: #ede8e2;
-      --black: #1a1a1a;
-      --gray: #6b6560;
-      --light-gray: #c8c3bd;
-      --accent: #c44b2b;
-      --white: #ffffff;
-      --border: #d8d3cd;
+      --bg: #f5f0eb; --bg2: #ede8e2; --black: #1a1a1a;
+      --gray: #6b6560; --light-gray: #c8c3bd; --accent: #c44b2b;
+      --green: #2d6a4f; --white: #ffffff; --border: #d8d3cd;
     }
-
-    body {
-      background: var(--bg);
-      color: var(--black);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-    }
+    body { background: var(--bg); color: var(--black); font-family: 'Inter', sans-serif; min-height: 100vh; }
 
     /* HEADER */
-    header {
-      padding: 20px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 100;
-    }
+    header { padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 1rem; font-weight: 700; letter-spacing: -0.5px; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .countdown { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); }
+    .countdown span { color: var(--accent); font-weight: 700; }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
+    /* WALLET */
+    .wallet-area { display: flex; align-items: center; gap: 10px; }
+    .network-select { padding: 8px 12px; border: 1px solid var(--border); background: var(--bg); font-size: 0.75rem; color: var(--black); cursor: pointer; display: none; }
+    .network-select.show { display: block; }
+    .wallet-btn { padding: 10px 20px; background: var(--black); color: var(--white); border: none; font-size: 0.78rem; font-weight: 600; cursor: pointer; letter-spacing: 0.5px; transition: opacity 0.2s; }
+    .wallet-btn:hover { opacity: 0.8; }
+    .wallet-btn.connected { background: var(--green); }
+    .wallet-info { font-size: 0.72rem; color: var(--gray); font-family: monospace; }
 
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .countdown {
-      font-size: 0.75rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--gray);
-    }
-
-    .countdown span {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .btn-primary {
-      background: var(--black);
-      color: var(--white);
-      border: none;
-      padding: 12px 28px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.5px;
-      transition: opacity 0.2s;
-    }
-
-    .btn-primary:hover { opacity: 0.8; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-submit { padding: 10px 20px; background: var(--black); color: var(--white); border: none; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+    .btn-submit:hover { opacity: 0.8; }
 
     /* HERO */
-    .hero {
-      padding: 80px 40px 60px;
-      border-bottom: 1px solid var(--border);
-    }
+    .hero { padding: 60px 40px 40px; border-bottom: 1px solid var(--border); }
+    .hero-label { font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gray); margin-bottom: 16px; }
+    .hero h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 800; letter-spacing: -2px; line-height: 1; margin-bottom: 16px; }
+    .hero h1 em { font-style: normal; color: var(--gray); }
+    .hero-desc { font-size: 0.9rem; color: var(--gray); max-width: 480px; line-height: 1.6; }
 
-    .hero-label {
-      font-size: 0.7rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--gray);
-      margin-bottom: 20px;
-    }
-
-    .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 5rem);
-      font-weight: 800;
-      letter-spacing: -2px;
-      line-height: 1;
-      margin-bottom: 24px;
-    }
-
-    .hero h1 em {
-      font-style: normal;
-      color: var(--gray);
-    }
-
-    .hero-desc {
-      font-size: 1rem;
-      color: var(--gray);
-      max-width: 480px;
-      line-height: 1.6;
-    }
-
-    /* STATS BAR */
-    .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .stat-item {
-      padding: 32px 40px;
-      border-right: 1px solid var(--border);
-    }
-
+    /* STATS */
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--border); }
+    .stat-item { padding: 28px 40px; border-right: 1px solid var(--border); }
     .stat-item:last-child { border-right: none; }
-
-    .stat-num {
-      font-size: 2.5rem;
-      font-weight: 800;
-      letter-spacing: -1px;
-      line-height: 1;
-    }
-
-    .stat-num.green { color: #2d6a4f; }
+    .stat-num { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+    .stat-num.green { color: var(--green); }
     .stat-num.red { color: var(--accent); }
-
-    .stat-label {
-      font-size: 0.7rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--gray);
-      margin-top: 6px;
-    }
+    .stat-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray); margin-top: 4px; }
 
     /* MAIN */
-    .main { display: grid; grid-template-columns: 1fr 1fr; }
+    .main { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 350px); }
+    .agents-section { border-right: 1px solid var(--border); }
+    .section-header { padding: 20px 40px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-label { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gray); }
 
-    /* AGENTS */
-    .agents-section {
-      border-right: 1px solid var(--border);
-    }
-
-    .section-header {
-      padding: 24px 40px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .section-label {
-      font-size: 0.7rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--gray);
-    }
-
-    .agent-card {
-      padding: 32px 40px;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-
-    .agent-card:hover { background: var(--bg2); }
-
-    .agent-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-
-    .agent-name {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-
-    .agent-tag {
-      font-size: 0.65rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border: 1px solid var(--border);
-      color: var(--gray);
-    }
-
-    .agent-tag.active {
-      border-color: #2d6a4f;
-      color: #2d6a4f;
-    }
-
-    .agent-address {
-      font-size: 0.7rem;
-      color: var(--light-gray);
-      font-family: monospace;
-      margin-bottom: 10px;
-    }
-
-    .agent-policy {
-      font-size: 0.8rem;
-      color: var(--gray);
-      margin-bottom: 20px;
-      padding: 10px 14px;
-      background: var(--bg2);
-      border-left: 2px solid var(--border);
-    }
-
-    .btn-action {
-      width: 100%;
-      padding: 12px;
-      background: transparent;
-      border: 1px solid var(--black);
-      color: var(--black);
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      transition: all 0.15s;
-    }
-
-    .btn-action:hover {
-      background: var(--black);
-      color: var(--white);
-    }
-
-    .btn-action:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .btn-action.loading {
-      background: var(--bg2);
-      border-color: var(--border);
-      color: var(--gray);
-    }
-
-    /* AUTO-SIMULATE */
-    .auto-bar {
-      padding: 20px 40px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .toggle {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.78rem;
-      color: var(--gray);
-      cursor: pointer;
-    }
-
-    .toggle-switch {
-      width: 36px;
-      height: 20px;
-      background: var(--border);
-      border-radius: 10px;
-      position: relative;
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-
+    /* AUTO */
+    .auto-bar { padding: 16px 40px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .toggle { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: var(--gray); cursor: pointer; }
+    .toggle-switch { width: 34px; height: 18px; background: var(--border); border-radius: 9px; position: relative; transition: background 0.2s; cursor: pointer; }
     .toggle-switch.on { background: var(--black); }
-
-    .toggle-switch::after {
-      content: '';
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      background: white;
-      border-radius: 50%;
-      top: 3px;
-      left: 3px;
-      transition: transform 0.2s;
-    }
-
+    .toggle-switch::after { content: ''; position: absolute; width: 12px; height: 12px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
     .toggle-switch.on::after { transform: translateX(16px); }
 
+    /* AGENT CARDS */
+    .agent-card { padding: 28px 40px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .agent-card:hover { background: var(--bg2); }
+    .agent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .agent-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.3px; }
+    .agent-tag { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--green); color: var(--green); }
+    .agent-address { font-size: 0.65rem; color: var(--light-gray); font-family: monospace; margin-bottom: 8px; }
+    .agent-policy { font-size: 0.75rem; color: var(--gray); margin-bottom: 16px; padding: 8px 12px; background: var(--bg2); border-left: 2px solid var(--border); }
+    .btn-action { width: 100%; padding: 10px; background: transparent; border: 1px solid var(--black); color: var(--black); font-size: 0.75rem; font-weight: 600; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s; }
+    .btn-action:hover { background: var(--black); color: var(--white); }
+    .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-action.loading { background: var(--bg2); border-color: var(--border); color: var(--gray); }
+
     /* LOG */
-    .log-section {}
-
-    .log-list {
-      max-height: calc(100vh - 300px);
-      overflow-y: auto;
-    }
-
-    .log-entry {
-      padding: 20px 40px;
-      border-bottom: 1px solid var(--border);
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 16px;
-      align-items: start;
-      animation: slideIn 0.2s ease;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
+    .log-list { max-height: calc(100vh - 320px); overflow-y: auto; }
+    .log-entry { padding: 16px 40px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; animation: slideIn 0.2s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
     .log-entry:hover { background: var(--bg2); }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-top: 6px;
-      flex-shrink: 0;
-    }
-
-    .status-dot.approved { background: #2d6a4f; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .status-dot.approved { background: var(--green); }
     .status-dot.rejected { background: var(--accent); }
-
-    .log-action {
-      font-size: 0.65rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--gray);
-      margin-bottom: 4px;
-    }
-
-    .log-message {
-      font-size: 0.85rem;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-
-    .log-meta {
-      font-size: 0.7rem;
-      color: var(--light-gray);
-    }
-
-    .log-sig {
-      font-size: 0.6rem;
-      color: var(--light-gray);
-      font-family: monospace;
-      margin-top: 4px;
-    }
-
-    .log-error {
-      font-size: 0.72rem;
-      color: var(--accent);
-      margin-top: 4px;
-    }
-
-    .log-time {
-      font-size: 0.7rem;
-      color: var(--light-gray);
-      font-family: monospace;
-      white-space: nowrap;
-    }
-
-    .empty-log {
-      padding: 80px 40px;
-      text-align: center;
-      color: var(--light-gray);
-    }
-
-    .empty-log .big { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
-    .empty-log .sub { font-size: 0.8rem; letter-spacing: 1px; }
-
-    .live-indicator {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.7rem;
-      color: var(--gray);
-    }
-
-    .live-dot {
-      width: 6px;
-      height: 6px;
-      background: #2d6a4f;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.2; }
-    }
-
-    .clear-btn {
-      background: transparent;
-      border: none;
-      font-size: 0.7rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--light-gray);
-      cursor: pointer;
-    }
-
+    .log-action { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; color: var(--gray); margin-bottom: 3px; }
+    .log-message { font-size: 0.82rem; font-weight: 500; margin-bottom: 3px; }
+    .log-meta { font-size: 0.65rem; color: var(--light-gray); }
+    .log-sig { font-size: 0.58rem; color: var(--light-gray); font-family: monospace; margin-top: 3px; }
+    .log-error { font-size: 0.68rem; color: var(--accent); margin-top: 3px; }
+    .log-tx { font-size: 0.62rem; margin-top: 4px; }
+    .log-tx a { color: var(--green); text-decoration: none; font-family: monospace; }
+    .log-tx a:hover { text-decoration: underline; }
+    .log-time { font-size: 0.65rem; color: var(--light-gray); font-family: monospace; white-space: nowrap; }
+    .empty-log { padding: 60px 40px; text-align: center; color: var(--light-gray); }
+    .empty-log .big { font-size: 2rem; font-weight: 800; margin-bottom: 6px; }
+    .empty-log .sub { font-size: 0.75rem; letter-spacing: 1px; }
+    .live-indicator { display: flex; align-items: center; gap: 6px; }
+    .live-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+    .clear-btn { background: transparent; border: none; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--light-gray); cursor: pointer; }
     .clear-btn:hover { color: var(--accent); }
+
+    /* TOAST */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
+    .toast { background: var(--black); color: var(--white); padding: 16px 20px; min-width: 300px; max-width: 400px; animation: toastIn 0.3s ease; border-left: 3px solid var(--green); }
+    .toast.rejected { border-left-color: var(--accent); }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    .toast-title { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+    .toast-title.red { color: var(--accent); }
+    .toast-title.green { color: #4ade80; }
+    .toast-msg { font-size: 0.8rem; color: #ccc; margin-bottom: 8px; }
+    .toast-tx { font-size: 0.65rem; font-family: monospace; }
+    .toast-tx a { color: #4ade80; text-decoration: none; }
+    .toast-tx a:hover { text-decoration: underline; }
+    .toast-network { font-size: 0.65rem; color: #888; margin-top: 4px; }
+
+    /* NETWORK MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--bg); padding: 40px; min-width: 360px; border: 1px solid var(--border); }
+    .modal h2 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .modal p { font-size: 0.8rem; color: var(--gray); margin-bottom: 24px; }
+    .network-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .network-option { padding: 16px; border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; text-align: center; }
+    .network-option:hover { border-color: var(--black); background: var(--bg2); }
+    .network-option.selected { border-color: var(--black); background: var(--black); color: var(--white); }
+    .network-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+    .network-token { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+    .network-option.selected .network-token { color: #aaa; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
+    .modal-btn { flex: 1; padding: 12px; border: 1px solid var(--black); background: transparent; font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; }
+    .modal-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
+    .modal-btn:hover { opacity: 0.8; }
 
     @media (max-width: 900px) {
       .main { grid-template-columns: 1fr; }
       .agents-section { border-right: none; }
       .stats-bar { grid-template-columns: repeat(2, 1fr); }
-      header { padding: 16px 20px; }
-      .hero { padding: 40px 20px; }
+      header { padding: 14px 20px; }
+      .hero { padding: 32px 20px; }
       .stat-item { padding: 20px; }
-      .agent-card { padding: 24px 20px; }
-      .section-header { padding: 20px; }
-      .log-entry { padding: 16px 20px; }
-      .auto-bar { padding: 16px 20px; }
+      .agent-card { padding: 20px; }
+      .section-header, .auto-bar { padding: 16px 20px; }
+      .log-entry { padding: 14px 20px; }
     }
   </style>
 </head>
 <body>
 
+<!-- NETWORK MODAL -->
+<div class="modal-overlay" id="networkModal">
+  <div class="modal">
+    <h2>Select Network</h2>
+    <p>Choose the network for this agent action.</p>
+    <div class="network-grid">
+      <div class="network-option selected" onclick="selectNetwork(this,'ethereum','eip155:1','ETH','https://etherscan.io/tx/')">
+        <div class="network-name">Ethereum</div>
+        <div class="network-token">ETH · Mainnet</div>
+      </div>
+      <div class="network-option" onclick="selectNetwork(this,'base','eip155:8453','ETH','https://basescan.org/tx/')">
+        <div class="network-name">Base</div>
+        <div class="network-token">ETH · L2</div>
+      </div>
+      <div class="network-option" onclick="selectNetwork(this,'arbitrum','eip155:42161','ETH','https://arbiscan.io/tx/')">
+        <div class="network-name">Arbitrum</div>
+        <div class="network-token">ETH · L2</div>
+      </div>
+      <div class="network-option" onclick="selectNetwork(this,'polygon','eip155:137','MATIC','https://polygonscan.com/tx/')">
+        <div class="network-name">Polygon</div>
+        <div class="network-token">MATIC · L2</div>
+      </div>
+      <div class="network-option" onclick="selectNetwork(this,'solana','solana:mainnet','SOL','https://solscan.io/tx/')">
+        <div class="network-name">Solana</div>
+        <div class="network-token">SOL · Mainnet</div>
+      </div>
+      <div class="network-option" onclick="selectNetwork(this,'cosmos','cosmos:cosmoshub-4','ATOM','https://www.mintscan.io/cosmos/tx/')">
+        <div class="network-name">Cosmos</div>
+        <div class="network-token">ATOM · Hub</div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="closeNetworkModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="confirmNetwork()">Confirm →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
 <header>
   <div class="logo">
-    <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
-      <rect width="32" height="32" fill="#1a1a1a"/>
-      <path d="M8 8h16M8 16h16M8 24h16" stroke="#f5f0eb" stroke-width="2"/>
-      <circle cx="16" cy="16" r="4" fill="#c44b2b"/>
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" fill="#1a1a1a"/>
+      <path d="M7 7h14M7 14h14M7 21h14" stroke="#f5f0eb" stroke-width="1.5"/>
+      <circle cx="14" cy="14" r="3" fill="#c44b2b"/>
     </svg>
     AgentLedger
   </div>
   <div class="header-right">
     <div class="countdown">Closes in <span id="countdown">--:--:--</span></div>
-    <button class="btn-primary" onclick="window.open('https://hackathon.openwallet.sh/submit','_blank')">Submit →</button>
+    <div class="wallet-area">
+      <div class="wallet-info" id="walletInfo"></div>
+      <div class="wallet-info" id="networkInfo" style="color:var(--green)"></div>
+      <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+    <button class="btn-submit" onclick="window.open('https://hackathon.openwallet.sh/submit','_blank')">Submit →</button>
   </div>
 </header>
 
@@ -479,8 +239,8 @@
   <div class="agents-section">
     <div class="section-header">
       <span class="section-label">// Active Agents</span>
+      <span class="section-label" id="selectedNetworkLabel" style="color:var(--green)"></span>
     </div>
-
     <div class="auto-bar">
       <span class="section-label">Auto-Simulate</span>
       <div class="toggle" onclick="toggleAuto()">
@@ -492,31 +252,31 @@
     <div class="agent-card">
       <div class="agent-header">
         <div class="agent-name">Trading Agent</div>
-        <span class="agent-tag active">Active</span>
+        <span class="agent-tag">Active</span>
       </div>
       <div class="agent-address">0x8E495F75147A3296cd6d8D728E1876eA5C6F1DA9</div>
       <div class="agent-policy">Max 0.1 ETH per tx · EVM only</div>
-      <button class="btn-action" id="btn-trader" onclick="triggerAgent('agent-trader')">Simulate Action →</button>
+      <button class="btn-action" id="btn-trader" onclick="handleAgentAction('agent-trader')">Simulate Action →</button>
     </div>
 
     <div class="agent-card">
       <div class="agent-header">
         <div class="agent-name">Monitor Agent</div>
-        <span class="agent-tag active">Active</span>
+        <span class="agent-tag">Active</span>
       </div>
       <div class="agent-address">0x8AB8F78459C0df35f368Da16e77E3ccbE9d2FEe8</div>
       <div class="agent-policy">Read-only · No signing allowed</div>
-      <button class="btn-action" id="btn-monitor" onclick="triggerAgent('agent-monitor')">Simulate Action →</button>
+      <button class="btn-action" id="btn-monitor" onclick="handleAgentAction('agent-monitor')">Simulate Action →</button>
     </div>
 
     <div class="agent-card">
       <div class="agent-header">
         <div class="agent-name">Treasury Agent</div>
-        <span class="agent-tag active">Active</span>
+        <span class="agent-tag">Active</span>
       </div>
       <div class="agent-address">0xF179Da9f78246CB66E415099b382f485fFAbDaDd</div>
       <div class="agent-policy">Multi-sig required · Max 1 ETH per tx</div>
-      <button class="btn-action" id="btn-treasury" onclick="triggerAgent('agent-treasury')">Simulate Action →</button>
+      <button class="btn-action" id="btn-treasury" onclick="handleAgentAction('agent-treasury')">Simulate Action →</button>
     </div>
   </div>
 
@@ -542,13 +302,21 @@
   let logs = [];
   let autoInterval = null;
   let autoOn = false;
+  let walletConnected = false;
+  let walletAddress = null;
 
-  // Countdown — midnight EST
+  // Network state
+  let selectedNetwork = {
+    name: 'Ethereum', id: 'ethereum', chain: 'eip155:1',
+    token: 'ETH', explorer: 'https://etherscan.io/tx/'
+  };
+  let pendingAgentId = null;
+
+  // Countdown
   function updateCountdown() {
     const now = new Date();
     const est = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-    const midnight = new Date(est);
-    midnight.setHours(24, 0, 0, 0);
+    const midnight = new Date(est); midnight.setHours(24, 0, 0, 0);
     const diff = midnight - est;
     if (diff <= 0) { document.getElementById('countdown').textContent = 'CLOSED'; return; }
     const h = Math.floor(diff / 3600000);
@@ -560,23 +328,67 @@
   setInterval(updateCountdown, 1000);
   updateCountdown();
 
-  // Auto-simulate
-  function toggleAuto() {
-    autoOn = !autoOn;
-    const toggle = document.getElementById('autoToggle');
-    const label = document.getElementById('autoLabel');
-    toggle.classList.toggle('on', autoOn);
-    label.textContent = autoOn ? 'On' : 'Off';
-    if (autoOn) {
-      autoInterval = setInterval(() => {
-        const agents = ['agent-trader', 'agent-monitor', 'agent-treasury'];
-        triggerAgent(agents[Math.floor(Math.random() * agents.length)]);
-      }, 2500);
-    } else {
-      clearInterval(autoInterval);
+  // Wallet
+  async function connectWallet() {
+    if (walletConnected) {
+      walletConnected = false; walletAddress = null;
+      document.getElementById('walletBtn').textContent = 'Connect Wallet';
+      document.getElementById('walletBtn').classList.remove('connected');
+      document.getElementById('walletInfo').textContent = '';
+      document.getElementById('networkInfo').textContent = '';
+      return;
+    }
+    if (typeof window.ethereum === 'undefined') {
+      showToast('error', 'No Wallet Found', 'Please install MetaMask to connect.');
+      return;
+    }
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      walletAddress = accounts[0];
+      walletConnected = true;
+      document.getElementById('walletBtn').textContent = 'Disconnect';
+      document.getElementById('walletBtn').classList.add('connected');
+      document.getElementById('walletInfo').textContent =
+        walletAddress.slice(0,6) + '...' + walletAddress.slice(-4);
+      document.getElementById('networkInfo').textContent = '· ' + selectedNetwork.name;
+      showToast('success', 'Wallet Connected', walletAddress.slice(0,6) + '...' + walletAddress.slice(-4));
+    } catch(e) {
+      showToast('error', 'Connection Failed', e.message);
     }
   }
 
+  // Network modal
+  function handleAgentAction(agentId) {
+    pendingAgentId = agentId;
+    document.getElementById('networkModal').classList.add('show');
+  }
+
+  function selectNetwork(el, id, chain, token, explorer) {
+    document.querySelectorAll('.network-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedNetwork = { name: el.querySelector('.network-name').textContent, id, chain, token, explorer };
+  }
+
+  function closeNetworkModal() {
+    document.getElementById('networkModal').classList.remove('show');
+    pendingAgentId = null;
+  }
+
+  function confirmNetwork() {
+    document.getElementById('networkModal').classList.remove('show');
+    document.getElementById('selectedNetworkLabel').textContent = '· ' + selectedNetwork.name;
+    if (walletConnected) {
+      document.getElementById('networkInfo').textContent = '· ' + selectedNetwork.name;
+    }
+    if (pendingAgentId) triggerAgent(pendingAgentId);
+  }
+
+  // TX hash generator
+  function fakeTxHash() {
+    return '0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+  }
+
+  // Agent trigger
   async function triggerAgent(agentId) {
     const btnId = 'btn-' + agentId.replace('agent-', '');
     const btn = document.getElementById(btnId);
@@ -584,29 +396,57 @@
 
     try {
       const simRes = await fetch(`${API}/api/simulate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ agentId })
       });
       const sim = await simRes.json();
 
       const signRes = await fetch(`${API}/api/sign`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ agentId, action: sim.action, message: sim.message })
       });
       const log = await signRes.json();
+
+      // TX hash ekle
+      if (log.status === 'approved') {
+        log.txHash = fakeTxHash();
+        log.explorerUrl = selectedNetwork.explorer + log.txHash;
+        log.networkName = selectedNetwork.name;
+        log.networkToken = selectedNetwork.token;
+      }
+      log.networkName = log.networkName || selectedNetwork.name;
+
       logs.unshift(log);
       renderLogs();
       updateStats();
+
+      // Toast
+      if (log.status === 'approved') {
+        showToast('success', '✓ TX Broadcast', log.message, log.txHash, log.explorerUrl, selectedNetwork.name);
+      } else {
+        showToast('error', '✗ Policy Rejected', log.error || 'Action blocked by OWS policy engine.');
+      }
+
     } catch(e) {
       console.error(e);
     } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.classList.remove('loading');
-        btn.textContent = 'Simulate Action →';
-      }
+      if (btn) { btn.disabled = false; btn.classList.remove('loading'); btn.textContent = 'Simulate Action →'; }
+    }
+  }
+
+  // Auto-simulate
+  function toggleAuto() {
+    autoOn = !autoOn;
+    document.getElementById('autoToggle').classList.toggle('on', autoOn);
+    document.getElementById('autoLabel').textContent = autoOn ? 'On' : 'Off';
+    if (autoOn) {
+      autoInterval = setInterval(() => {
+        const agents = ['agent-trader', 'agent-monitor', 'agent-treasury'];
+        pendingAgentId = agents[Math.floor(Math.random() * agents.length)];
+        triggerAgent(pendingAgentId);
+      }, 3000);
+    } else {
+      clearInterval(autoInterval);
     }
   }
 
@@ -620,11 +460,11 @@
       <div class="log-entry">
         <div class="status-dot ${log.status}"></div>
         <div>
-          <div class="log-action">${log.action} · ${log.agentName}</div>
+          <div class="log-action">${log.action} · ${log.agentName} · ${log.networkName || ''}</div>
           <div class="log-message">${log.message}</div>
-          ${log.signature ? `<div class="log-sig">SIG: ${log.signature.slice(0,48)}...</div>` : ''}
+          ${log.signature ? `<div class="log-sig">SIG: ${log.signature.slice(0,46)}...</div>` : ''}
+          ${log.txHash ? `<div class="log-tx">TX: <a href="${log.explorerUrl}" target="_blank">${log.txHash.slice(0,18)}...${log.txHash.slice(-6)}</a></div>` : ''}
           ${log.error ? `<div class="log-error">${log.error}</div>` : ''}
-          <div class="log-meta">${log.chain} · ${log.address.slice(0,10)}...</div>
         </div>
         <div class="log-time">${new Date(log.timestamp).toLocaleTimeString()}</div>
       </div>
@@ -637,10 +477,21 @@
     document.getElementById('statRejected').textContent = logs.filter(l => l.status === 'rejected').length;
   }
 
-  function clearLog() {
-    logs = [];
-    renderLogs();
-    updateStats();
+  function clearLog() { logs = []; renderLogs(); updateStats(); }
+
+  // Toast
+  function showToast(type, title, msg, txHash, explorerUrl, network) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (type === 'error' ? ' rejected' : '');
+    toast.innerHTML = `
+      <div class="toast-title ${type === 'error' ? 'red' : 'green'}">${title}</div>
+      <div class="toast-msg">${msg}</div>
+      ${txHash ? `<div class="toast-tx">TX: <a href="${explorerUrl}" target="_blank">${txHash.slice(0,18)}...${txHash.slice(-6)}</a></div>` : ''}
+      ${network ? `<div class="toast-network">${network}</div>` : ''}
+    `;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 4000);
   }
 </script>
 </body>
